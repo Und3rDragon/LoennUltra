@@ -25,14 +25,10 @@ local function getImageState(map, resolutionScale, bounds)
     imageState.selectedItem = {}
     imageState.showRoomBackground = false
     imageState.showRoomBorders = false
+    imageState.skipTriggerScreenText = true
 
-    -- TODO - Improve, this is a bit of a hack
-    function imageState.getLayerVisible(layer)
-        if layer == "triggers" then
-            return false
-        end
-
-        return true
+    function imageState.getLayerShouldRender(layer)
+        return layer ~= "triggers"
     end
 
     return imageState
@@ -71,7 +67,7 @@ function mapImageGenerator.getMapImageData(map)
 
     -- Redraw all rooms with new state info
     for _, room in ipairs(map.rooms) do
-        local redrawSuccess, redrawError = pcall(celesteRender.forceRedrawRoom, room, imageState, true)
+        local redrawSuccess, redrawError = pcall(celesteRender.forceRedrawRoom, room, imageState, false)
 
         if not redrawSuccess then
             celesteRender.invalidateRoomCache()
@@ -102,7 +98,11 @@ function mapImageGenerator.getMapImageData(map)
 
             local canvas = canvasOrError
             local drawSuccess, drawError = pcall(canvas.renderTo, canvas, function()
-                celesteRender.drawMap(imageState)
+                local selectedItem, selectedItemType = imageState.getSelectedItem()
+
+                celesteRender.drawFillers(imageState.map.fillers, imageState, selectedItem, selectedItemType)
+                celesteRender.drawRooms(imageState.map.rooms, imageState, selectedItem, selectedItemType)
+                celesteRender.drawScreenTexts(imageState.map.rooms, imageState)
             end)
 
             if not drawSuccess then

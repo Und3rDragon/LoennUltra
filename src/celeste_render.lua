@@ -1499,7 +1499,9 @@ local function drawScreenTexts(rooms, state)
                     love.graphics.setScissor(scissorX, scissorY, scissorWidth, scissorHeight)
                 end
 
-                for _, layerName in ipairs({"entities", "triggers"}) do
+                local screenTextLayers = state.skipTriggerScreenText and {"entities"} or {"entities", "triggers"}
+
+                for _, layerName in ipairs(screenTextLayers) do
                     for _, drawable in ipairs(overlays[layerName] or {}) do
                         if isTextOnScreen(drawable, room, viewport, selected) then
                             drawScreenText(drawable, room, viewport)
@@ -1626,6 +1628,8 @@ function celesteRender.drawMap(state)
         end
     end
 end
+
+celesteRender.drawScreenTexts = drawScreenTexts
 
 modificationWarner.addModificationWarner(celesteRender)
 
