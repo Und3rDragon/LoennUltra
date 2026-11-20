@@ -45,7 +45,8 @@ function drawableFunction.fromFunction(func, ...)
     drawable.args = args
     drawable.argCount = argCount
     drawable.draw = function(self)
-        self.func(unpack(self.args, 1, self.argCount))
+        local count = math.max(self.argCount or 0, #self.args)
+        self.func(unpack(self.args, 1, count))
     end
 
     return drawable
