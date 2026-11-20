@@ -490,21 +490,28 @@ function modHandler.cleanDebugSource(source)
 end
 
 -- Defaults to current mod directory
+local safeStub
+safeStub = setmetatable({}, {
+    __index = function() return safeStub end,
+    __call = function() return safeStub end,
+})
+
 function modHandler.requireFromPlugin(lib, modName)
     local requireName = modHandler.filenameFromPlugin(lib, modName, ".")
 
     if requireName then
         local success, result = utils.tryrequire(requireName)
-
         if success then
             modHandler.knownPluginRequires[requireName] = result
-
             return result
         end
 
-    else
-        -- TODO - Add warning
+        logging.warning(string.format(
+            "[plugins] failed to require '%s' (mod: %s); using safe stub",
+            tostring(requireName), tostring(modName)))
     end
+
+    return safeStub
 end
 
 -- Defaults to current mod directory
