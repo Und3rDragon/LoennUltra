@@ -144,10 +144,10 @@ function mapImageGenerator.saveMapImage(filename, map)
         return false, imageError or "could not generate the map image"
     end
 
-    local encoded, encodeError = pcall(imageData.encode, imageData, "png")
+    local success, encodedOrError = pcall(imageData.encode, imageData, "png")
 
-    if not encoded then
-        return false, "could not encode the image as PNG: " .. tostring(encodeError)
+    if not success then
+        return false, "could not encode the image as PNG: " .. tostring(encodedOrError)
     end
 
     local fh, openError = io.open(filename, "wb")
@@ -156,7 +156,7 @@ function mapImageGenerator.saveMapImage(filename, map)
         return false, "could not open the output file: " .. tostring(openError)
     end
 
-    local data = encoded:getString()
+    local data = encodedOrError:getString()
     local writeSuccess, writeError = pcall(fh.write, fh, data)
 
     fh:close()
