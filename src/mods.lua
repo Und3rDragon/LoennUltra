@@ -43,6 +43,10 @@ modHandler.isolatedPluginCategories = {
 -- isolated categories from their "Loenn" folder as well
 modHandler.isolatedPluginWhitelistFallback = {
     "AltSidesHelper",
+    "Loenn_Searcher",
+    "Loenn Searcher",
+    "CameraSim",
+    "LoennExtended",
 }
 
 local isolatedPluginWhitelistLookup
@@ -103,12 +107,28 @@ function modHandler.isIsolatedPluginWhitelisted(modFolderName)
     return false
 end
 
+-- A mod that has not migrated to the isolated plugin folder keeps working from "Loenn"
+function modHandler.hasIsolatedCategory(modFolderName, startFolder)
+    if not modFolderName then
+        return false
+    end
+
+    local path = utils.convertToUnixPath(utils.joinpath(
+        string.format(modHandler.specificModContent, modFolderName),
+        modHandler.isolatedPluginRoot,
+        startFolder
+    ))
+
+    return love.filesystem.getInfo(path) ~= nil
+end
+
 -- Returns the root folders that should be searched for a plugin category
 function modHandler.getPluginRoots(startFolder, modFolderName)
     if modHandler.isolatedPluginCategories[startFolder] or startFolder == "libraries" then
         local roots = {modHandler.isolatedPluginRoot}
 
-        if modHandler.isIsolatedPluginWhitelisted(modFolderName) then
+        if modHandler.isIsolatedPluginWhitelisted(modFolderName)
+            or not modHandler.hasIsolatedCategory(modFolderName, startFolder) then
             for _, folderName in ipairs(modHandler.pluginFolderNames) do
                 table.insert(roots, folderName)
             end
