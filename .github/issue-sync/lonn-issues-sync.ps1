@@ -125,8 +125,14 @@ foreach ($it in $data.issues) {
     $payload = @{ title = $it.title; body = $it.body; labels = @($it.labels) }
     if ($it.milestone -and $msCache.ContainsKey($it.milestone)) { $payload['milestone'] = $msCache[$it.milestone] }
     Write-Host ("  +     {0}" -f $it.title) -ForegroundColor Green
-    Invoke-GH POST "$base/issues" $payload | Out-Null
+    $created = Invoke-GH POST "$base/issues" $payload
     $issuesAdded++
+
+    # JSON 里可以写 "state": "closed"，表示这条 issue 建完立即关闭（用于「已实现」的记录）
+    if ($it.state -eq 'closed' -and $created -and $created.number) {
+        Write-Host ("        -> 立即关闭 #{0}（已实现）" -f $created.number) -ForegroundColor DarkGray
+        Invoke-GH PATCH "$base/issues/$($created.number)" @{ state = 'closed' } | Out-Null
+    }
 }
 
 Write-Host "`n完成：新增 label $added 个、issue $issuesAdded 条。" -ForegroundColor Cyan
