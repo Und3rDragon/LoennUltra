@@ -485,6 +485,7 @@ function tool.setLayer(layer, subLayer)
     tool.subLayer = subLayer
 
     toolUtils.sendLayerEvent(tool, layer, subLayer)
+    subLayers.setLayerForceRender(layer, subLayer, true)
 
     return false
 end

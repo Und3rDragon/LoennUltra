@@ -5733,22 +5733,6 @@ function toolWindow.getWindow()
     toolWindow.tileToolList = tileToolList
     toolWindow.layerList = layerList
 
-    -- Selection can have several content types enabled at once. The magic list only knows one
-    -- selected index, so derive layer highlighting from the selection tool's layer set.
-    local defaultLayerGetIsSelected = layerList.getIsSelected
-
-    layerList.getIsSelected = function(self, element)
-        if toolHandler.currentToolName == "selection" and element.itemData then
-            local selectionTool = toolHandler.tools.selection
-            local layer = element.itemData.baseLayer
-
-            if selectionTool and layer then
-                return selectionTool.isLayerSelected(layer)
-            end
-        end
-
-        return defaultLayerGetIsSelected(self, element)
-    end
     toolWindow.materialList = materialList
 
     -- The room tool supports multi selection on the canvas. The generic magic list only knows a

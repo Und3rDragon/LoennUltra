@@ -24,15 +24,35 @@ end
 function subLayers.getShouldLayerRender(layer, subLayer)
     subLayer = subLayer or -1
 
-    if not loadedState.getLayerShouldRender(layer) then
-        return false
-    end
+    local groupVisible = loadedState.getLayerVisible(layer)
+    local groupForcedVisible = loadedState.getLayerForceRendered(layer)
 
     if subLayer == -1 then
-        return true
+        return groupVisible or groupForcedVisible
     end
 
-    return loadedState.getLayerVisible(subLayers.formatLayerName(layer, subLayer))
+    local subLayerName = subLayers.formatLayerName(layer, subLayer)
+
+    if groupVisible then
+        return loadedState.getLayerShouldRender(subLayerName)
+
+    else
+        return loadedState.getLayerForceRendered(subLayerName)
+    end
+end
+
+function subLayers.setLayerForceRender(layer, subLayer, currentValue, otherValue)
+    subLayer = subLayer or -1
+
+    local layerName = subLayers.formatLayerName(layer, subLayer)
+
+    if subLayer ~= -1 then
+        local layers = {layerName, layer}
+
+        return loadedState.setLayerForceRender(layer, layers, currentValue, otherValue)
+    end
+
+    return loadedState.setLayerForceRender(layer, layerName, currentValue, otherValue)
 end
 
 function subLayers.getLayerVisible(layer, subLayer)

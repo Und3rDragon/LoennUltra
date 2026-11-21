@@ -164,22 +164,6 @@ local function applySelectedLayerItems()
     end
 end
 
-local function syncActiveLayers()
-    state.activeLayers = {}
-
-    local subLayer = tool.subLayer
-
-    for _, layer in ipairs(selectedLayerItems) do
-        if layer ~= "allLayers" then
-            state.activeLayers[layer] = true
-
-            if subLayer and subLayer ~= -1 then
-                state.activeLayers[subLayers.formatLayerName(layer, subLayer)] = true
-            end
-        end
-    end
-end
-
 local function resetSelectedLayerItems(layer)
     selectedLayerItems = {}
 
@@ -203,7 +187,6 @@ function tool.setLayer(layer, subLayer)
     applySelectedLayerItems()
 
     tool.subLayer = subLayer
-    syncActiveLayers()
 
     if previousLayer ~= tool.layer then
         tool.setSelectionTargets({})
@@ -211,6 +194,10 @@ function tool.setLayer(layer, subLayer)
     end
 
     toolUtils.sendLayerEvent(tool, layer, subLayer)
+
+    if layer ~= "allLayers" then
+        subLayers.setLayerForceRender(layer, subLayer, true)
+    end
 
     return false
 end
@@ -222,7 +209,6 @@ function tool.selectSingleLayer(layer, subLayer)
     applySelectedLayerItems()
 
     tool.subLayer = subLayer or -1
-    syncActiveLayers()
 
     if previousLayer ~= tool.layer then
         tool.setSelectionTargets({})
@@ -284,7 +270,6 @@ function tool.toggleLayerSelection(layer)
     applySelectedLayerItems()
 
     tool.subLayer = -1
-    syncActiveLayers()
 
     return true
 end
