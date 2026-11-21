@@ -10,6 +10,9 @@
     $env:GH_TOKEN = 'ghp_xxx'
     powershell -ExecutionPolicy Bypass -File .\lonn-issues-from-commits.ps1 -LastN 15
     powershell -ExecutionPolicy Bypass -File .\lonn-issues-from-commits.ps1 -LastN 15 -DryRun
+
+  注意：Windows PowerShell 5.1 的 Invoke-RestMethod 用 -Body <string> 按 Latin-1 发送，
+        中文会被 GitHub 判成 Problems parsing JSON —— 这里统一改成 UTF-8 字节数组。
 #>
 [CmdletBinding()]
 param(
@@ -24,7 +27,7 @@ $ErrorActionPreference = 'Stop'
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
 $token = $env:GH_TOKEN
-if (-not $token) { throw '请先设置 GH_TOKEN（scope=repo 的 GitHub PAT）' }
+if (-not $token -and -not $DryRun) { throw '请先设置 GH_TOKEN（scope=repo 的 GitHub PAT）' }
 
 $headers = @{
     'Authorization'        = "token $token"
@@ -36,20 +39,35 @@ $base = "https://api.github.com/repos/$Owner/$Project"
 
 function Invoke-GH {
     param([string]$Method, [string]$Uri, $Body)
+
     if ($DryRun) {
         Write-Host ("  [dry] {0} {1}" -f $Method, $Uri) -ForegroundColor DarkGray
         return $null
     }
+
     if ($Body) {
-        return Invoke-RestMethod -Method $Method -Uri $Uri -Headers $headers `
-            -Body ($Body | ConvertTo-Json -Depth 5 -Compress) -ContentType 'application/json'
+        $json  = $Body | ConvertTo-Json -Depth 5 -Compress
+        $bytes = [Text.Encoding]::UTF8.GetBytes($json)
+        try {
+            return Invoke-RestMethod -Method $Method -Uri $Uri -Headers $headers `
+                -Body $bytes -ContentType 'application/json; charset=utf-8'
+        } catch {
+            Write-Host ("  失败: {0}" -f $_.ErrorDetails.Message) -ForegroundColor Red
+            throw
+        }
     }
-    return Invoke-RestMethod -Method $Method -Uri $Uri -Headers $headers
+
+    try {
+        return Invoke-RestMethod -Method $Method -Uri $Uri -Headers $headers
+    } catch {
+        Write-Host ("  失败: {0}" -f $_.ErrorDetails.Message) -ForegroundColor Red
+        throw
+    }
 }
 
 # ---------- 取 commit ----------
 $sep = '<<<C>>>'
-$raw = & git -C $RepoPath log -n $LastN --pretty=format:"$sep%H%x01%s%x01%b"
+$raw = (& git -C $RepoPath log -n $LastN --pretty=format:"$sep%H%x01%s%x01%b") -join "`n"
 if ($LASTEXITCODE -ne 0) { throw "git log 失败：$RepoPath" }
 
 $commits = @(($raw -split [regex]::Escape($sep)) | Where-Object { $_.Trim() })
@@ -58,8 +76,8 @@ Write-Host ("扫描 commit 数: {0}" -f $commits.Count) -ForegroundColor Cyan
 $fixPattern   = '(?i)\b(?:fix(?:e[sd])?|close[sd]?|resolve[sd]?)\b([^\r\n]*)'
 $issuePattern = '#(\d+)'
 
-$handled   = 0
-$unlinked  = New-Object System.Collections.ArrayList
+$handled  = 0
+$unlinked = New-Object System.Collections.ArrayList
 
 foreach ($c in $commits) {
     $parts = $c -split [char]1, 3
@@ -68,7 +86,8 @@ foreach ($c in $commits) {
     $sha     = $parts[0].Trim()
     $subject = $parts[1].Trim()
     $body    = if ($parts.Count -ge 3) { $parts[2] } else { '' }
-    $full    = "$subject`n$body"
+    # 剔除 "PR #123" / "pull request #123"，避免把外部 PR 号误当成 issue 引用
+    $full    = (($subject + "`n" + $body) -replace '(?i)\b(?:PR|pull\s*request)\s*#\d+', "")
     $short   = $sha.Substring(0, [Math]::Min(7, $sha.Length))
 
     $nums = @{}
