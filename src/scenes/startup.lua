@@ -60,7 +60,7 @@ function startupScene:firstEnter()
     -- Load language file for all other scenes
     languageRegistry.loadInternalFiles()
     languageRegistry.setLanguage(configs.general.language)
-    languageRegistry.setFallbackLanguage(defaultConfig.general.language)
+    languageRegistry.setFallbackLanguage("en_gb")
 
     -- Skip this scene if Celeste directory is already configured
     if not startup.requiresInit() then
