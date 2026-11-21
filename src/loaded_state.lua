@@ -541,7 +541,11 @@ end
 -- A layer is drawn when it is visible, which is what the eye icons in the tools
 -- window toggle. Selecting a layer never overrides that
 function state.getLayerShouldRender(layer)
-    return state.getLayerInformation(layer, "visible", true)
+    if state.getLayerInformation(layer, "visible", true) then
+        return true
+    end
+
+    return state.activeLayers[layer] == true
 end
 
 function state.getLayerVisible(layer)
@@ -584,6 +588,9 @@ state.viewport = viewportHandler.viewport
 
 -- Rendering information about layers
 state.layerInformation = {}
+
+-- Layers currently selected by the selection tool (rendered even when hidden)
+state.activeLayers = {}
 
 -- Hide content that is not in Everest.yaml
 state.onlyShowDependedOnMods = {}

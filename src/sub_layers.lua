@@ -24,7 +24,7 @@ end
 function subLayers.getShouldLayerRender(layer, subLayer)
     subLayer = subLayer or -1
 
-    if not loadedState.getLayerVisible(layer) then
+    if not loadedState.getLayerShouldRender(layer) then
         return false
     end
 
