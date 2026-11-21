@@ -8,6 +8,8 @@ local startupProgress = require("startup_progress")
 local liquidFill = require("ui.widgets.liquid_fill")
 local loadingTips = require("assets.loading.tips")
 
+local languageTipShown = false
+
 local loadingScene = {}
 
 loadingScene.name = "Loading"
@@ -272,6 +274,13 @@ function loadingScene:resetTips()
 
     if #loadingTips.tips > 0 then
         local index = love.math.random(#loadingTips.tips)
+        local configs = require("configs")
+
+        if not languageTipShown and configs.general and configs.general.language ~= "zh_cn" then
+            index = 1
+            languageTipShown = true
+        end
+
         self.tipState.index = index
         self.tipState.current = loadingTips.tips[index]
     end

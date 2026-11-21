@@ -1,6 +1,6 @@
 return {
     -- Language
-    language = "en_gb",
+    language = "zh_cn",
 
     -- Everest blacklist
     useEverestBlacklist = false,
