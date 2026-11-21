@@ -48,7 +48,7 @@ function matrixMt.__index:set0(x, y, value)
 end
 
 function matrixMt.__index:set(x, y, value)
-    if x >= 1 and x <= self._width and y >= 0 and y <= self._height then
+    if x >= 1 and x <= self._width and y >= 1 and y <= self._height then
         self[(x - 1) + (y - 1) * self._width + 1] = value
     end
 end

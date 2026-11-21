@@ -339,20 +339,18 @@ function celesteRender.sortBatchingTasks(state, taskList)
     local visibleTasks = {}
     local nonVisibileTasks = {}
 
+    local roomNames = {}
+
+    for _, r in ipairs(state.map.rooms) do
+        roomNames[r.name] = true
+    end
+
     for i = #taskList, 1, -1 do
         local task = taskList[i]
         local viewport = state.viewport
         local room = task.data.room
 
-        local roomExists = false
-
-        for _, r in ipairs(state.map.rooms) do
-            if r.name == room.name then
-                roomExists = true
-            end
-        end
-
-        if not task.done and roomExists then
+        if not task.done and roomNames[room.name] then
             if viewport.visible and viewportHandler.roomVisible(room, viewport) then
                 table.insert(visibleTasks, task)
 

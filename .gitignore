@@ -27,4 +27,4 @@
 /LoennHelper/*
 
 # publish
-/publish_template/*
+/publish_template/**.bak2

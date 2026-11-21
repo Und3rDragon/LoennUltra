@@ -148,6 +148,15 @@ function state.defaultVerifyErrorCallback(filename)
     sceneHandler.sendEvent("editorMapVerificationFailed", filename)
 
     filesystem.remove(filename)
+
+    -- Release the save lock. Otherwise every later save for this map would
+    -- queue behind a flag that never gets cleared (only mapSaveSuccess /
+    -- mapSaveFailed clear it, and neither runs on a verification failure).
+    local originalFilename = filename:gsub("%.saving$", "")
+
+    state.currentSaves = state.currentSaves or {}
+    state.currentSaves[originalFilename] = nil
+    state.currentSaves[filename] = nil
 end
 
 -- Check that the target file can be loaded again
@@ -162,6 +171,8 @@ function state.verifyFile(filename, successCallback, errorCallback)
                     function(decodeTask)
                         if decodeTask.success then
                             successCallback()
+                        else
+                            errorCallback(filename)
                         end
                     end
                 )
@@ -401,7 +412,7 @@ function state.isItemSelected(item)
         return true
 
     elseif state.selectedItemType == "table" then
-        return not not state.selectedItemType[item]
+        return not not state.selectedItem[item]
     end
 
     return false

@@ -283,11 +283,14 @@ function mapcoder.encodeFile(path, data, header)
     local content = writer:getString()
     local fh = io.open(path, "wb")
 
-    if fh then
-        fh:write(content)
-        fh:close()
+    if not fh then
         writer:close()
+        error(string.format("mapcoder: cannot open '%s' for writing", tostring(path)))
     end
+
+    fh:write(content)
+    fh:close()
+    writer:close()
 
     coroutine.yield()
 end
