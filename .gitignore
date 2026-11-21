@@ -28,3 +28,4 @@
 
 # publish
 /publish_template/**.bak2
+!/.github

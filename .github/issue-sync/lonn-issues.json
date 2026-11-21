@@ -1,0 +1,58 @@
+{
+  "labels": [
+    {"name": "bug",            "color": "d73a4a", "description": "功能缺陷"},
+    {"name": "enhancement",    "color": "0e8a16", "description": "新功能或改进"},
+    {"name": "compat",         "color": "fbca04", "description": "第三方插件/兼容性"},
+    {"name": "release",        "color": "1d76db", "description": "发版相关"},
+    {"name": "platform: macos",   "color": "8957e5", "description": ""},
+    {"name": "platform: linux",   "color": "8957e5", "description": ""},
+    {"name": "platform: windows", "color": "8957e5", "description": ""},
+    {"name": "platform: all",     "color": "8957e5", "description": ""},
+    {"name": "priority: high",   "color": "b60205", "description": ""},
+    {"name": "priority: medium", "color": "d93f0b", "description": ""},
+    {"name": "priority: low",    "color": "c2e0c6", "description": ""}
+  ],
+  "milestones": [
+    {"title": "v1.1.12", "description": ""},
+    {"title": "v1.1.13", "description": ""},
+    {"title": "v1.2.0",  "description": ""}
+  ],
+  "issues": [
+    {
+      "title": "Linux 发行包 nfd 路径失效（加载包问题）",
+      "labels": ["bug", "platform: linux", "priority: medium"],
+      "milestone": "v1.1.12",
+      "body": "**现象**：Linux 上「打开文件 / 选择目录」对话框可能失效。\n\n**根因**：`src/utils/filesystem.lua:46` 原写作 `(osUtils.getOS() == \"OS X\") and \"so\" or \"dll\"`，Linux 被判成 Windows 拿到 `.dll`；`src/utils/threads.lua:35` 也有同样的 `?.dll` 硬编码。\n\n**已修**：两处改为「非 Windows 一律 `.so`」。\n\n**待办**：用新源码重打 `LoennUltra-v1.1.12-linux.zip`，验证包内 `nfd.so` / `nfd_zenity.so` 存在、`.love` 内两处改动生效。"
+    },
+    {
+      "title": "还原地图内 styleground 实时预览（View 菜单缺 Stylegrounds）",
+      "labels": ["compat", "platform: all", "priority: high"],
+      "milestone": "v1.1.13",
+      "body": "**现象**：原版 Lönn 可通过 View > Stylegrounds 勾选 Background / Foreground / Snap to Room / Animate，在地图上实时预览（含动态）前后景；Ultra 的 View 菜单里没有这一项。\n\n**根因**：该功能由 AnotherLoennPlugin 的 `modules/styleground_preview/main.lua` 提供，它把子菜单插到 `view_layer` 之后（`:19-20`）。Ultra 的 `9e7ee88「移除 View/Layer」` 删掉了 `view_layer` 菜单项（现在全 src 搜 `view_layer` = 0 命中，只剩语言文件里的 `ui.menubar.view_layer`）→ `index` 返回 nil → `nil + 1` 抛错 → 被 `plugin_loader` 的 pcall 吞成一条 warning → 子菜单从未创建。\n\n**方案**：\n- A) 插件侧加 `or 1` 兜底（更新即丢）\n- B) Ultra 的 View 菜单补回 `{\"view_layer\", {}}` 锚点（代价：多一个空「图层」子菜单）\n- C) 菜单渲染器加 `anchor` 类型（不显示但可被定位，约 10 行）\n\n**关联**：与「图层选择后不显示内容」很可能同源。"
+    },
+    {
+      "title": "图层选择后不显示对应图层内容",
+      "labels": ["bug", "platform: all", "priority: high"],
+      "milestone": "v1.1.13",
+      "body": "**现象**：在编辑器里选择某个图层（entities / triggers / decalsFg / decalsBg / tilesFg / tilesBg）后，画布上该图层的内容不显示。\n\n**待补充**：具体操作路径（工具面板的图层下拉？房间列表下方的图层按钮？），以及现象是完全空白还是缺某类元素。\n\n**怀疑同源**：`9e7ee88「移除 View/Layer」` 同时改了 `src/selections.lua`、`src/sub_layers.lua`、`src/tools/selection.lua`、`src/loaded_state.lua`，删掉了 `getLayerVisible` / `setLayerForceRender` 等函数，很可能留下回归。\n\n**排查起点**：对比 `9e7ee88^` 与当前版本的 `sub_layers.lua` / `tools/selection.lua`。"
+    },
+    {
+      "title": "启动时不自动加载任何工程，直到手动打开或载入最近地图",
+      "labels": ["enhancement", "platform: all", "priority: low"],
+      "milestone": "v1.1.13",
+      "body": "**需求**：编辑器启动后停留在空状态（或欢迎页），不自动恢复上次地图；由用户主动「打开」或「最近文件」进入。\n\n**待确认**：Ultra 当前启动行为（`src/initial_startup.lua`，以及是否会自动加载上次地图 / `--load-mod` 参数）。\n\n**可能实现**：加设置项（如 `editor.restoreLastMapOnStartup`，默认关），或启动参数控制。"
+    },
+    {
+      "title": "功能不应只有快捷键：为纯快捷键功能补齐菜单入口",
+      "labels": ["enhancement", "platform: all", "priority: medium"],
+      "milestone": "v1.1.13",
+      "body": "**原则**：任何功能都必须能通过菜单访问，快捷键只作加速。\n\n**现状审计**（`src/standard_hotkeys.lua` vs `src/ui/menubar.lua`）：\n\n| 功能 | 快捷键 | 菜单入口 |\n|---|---|---|\n| 剪切 / 复制 / 粘贴 | ctrl+x / c / v | Edit 菜单里没有 |\n| 全选 / 取消选择 | ctrl+a / ctrl+shift+a | 没有 |\n| 水平 / 垂直翻转 | shift+h / shift+v | 没有 |\n| 房间移动（8 种粗细组合） | alt+方向 / ctrl+alt+方向 | 没有 |\n| 房间缩放（8 个） | 默认未绑定 | 没有 |\n| 新建 / 配置 / 删除房间 | ctrl+t / ctrl+shift+t / alt+delete | 没有 |\n| 坐标面板 | 反引号 | 没有 |\n| 调试重载（f5/f6/f7/ctrl+f5/ctrl+shift+f5） | 仅 redraw_map 在 View | 部分缺失 |\n\n**建议分批**：第一批只补 Edit 菜单的 Cut/Copy/Paste/Select All/Deselect 与翻转（最常用）；第二批补房间操作；第三批补调试项。"
+    },
+    {
+      "title": "macOS arm64 上 LuaJIT 的 JIT 未启用（jit false），评估能否开启",
+      "labels": ["enhancement", "platform: macos", "priority: medium"],
+      "milestone": "v1.1.13",
+      "body": "**背景**：mac arm64 原生启动已实现，日志显示 `Runtime arch: arm64 (luajit LuaJIT 2.1.1700008891, jit false)`。卡顿与保存速度已明显改善，但 `jit false` 意味着 Lua 代码逐条解释执行，纯 Lua 热点仍有很大优化空间。\n\n**已排查三条（均不成立）**：\n1. LuaJIT 不支持 arm64 —— 否，`vm_arm64.dasc`（124,009 B）存在，`lj_arch.h` 有 `LJ_TARGET_ARM64`。\n2. 编译期被 `LJ_OS_NOJIT` 关掉 —— 否，该宏只在 `LJ_TARGET_IOS || LJ_TARGET_CONSOLE` 定义。\n3. macOS hardened runtime 拦截 —— 否，`MacOS/love` 的 arm64 签名 `flags=0x20002`，`CS_RUNTIME=False`、无 entitlements。\n\n**=> 最可能**：LÖVE 官方 mac 构建禁用 JIT。\n\n**验证实验**：启动早期 `pcall(jit.on)` 并打印前后 `jit.status()`；`after=true` 则可考虑正式开启（潜在 3~10 倍），`after=false` 则只能等上游。\n\n**注意**：arm64 后端可能实验性，开启后需灰度验证稳定性。"
+    }
+  ]
+}
