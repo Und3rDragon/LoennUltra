@@ -1389,6 +1389,15 @@ local function drawScreenText(drawable, room, viewport)
     local drawX, drawY, drawWidth, drawHeight = drawable.x, drawable.y, drawable.width,
         drawable.height
 
+    if not drawWidth or not drawHeight then
+        logging.warning(string.format(
+            "[drawScreenText] drawable without size: type=%s text=%s",
+            tostring(drawable._type), tostring(drawable.text)))
+
+        drawWidth = drawWidth or layoutFont:getWidth(utils.trim(drawable.text or "")) * layoutFontSize
+        drawHeight = drawHeight or layoutFont:getHeight() * layoutFontSize
+    end
+
     if drawable._type == "drawableScreenText" then
         -- Keep whole words visible instead of letting getWrap split them. This is the same
         -- center-stretching layout trigger labels use; extrusion is intentionally not applied.
