@@ -43,9 +43,10 @@ local function prepareNfd()
     end
 
     local originalCpath = package.cpath
+    local nfdExtension = (osUtils.getOS() ~= "Windows") and "so" or "dll"
 
     for _, directory in ipairs(dialogDirectories()) do
-        package.cpath = package.cpath .. ";" .. directory .. "/?.dll"
+        package.cpath = package.cpath .. ";" .. directory .. "/?." .. nfdExtension
     end
 
     local success, module = pcall(require, "nfd")
@@ -55,7 +56,7 @@ local function prepareNfd()
     if success and type(module) == "table" then
         nfd = module
     else
-        logging.warning("Could not load 'nfd', file dialogs will not work")
+        logging.warning("Could not load 'nfd', file dialogs will not work: " .. tostring(module))
     end
 
     return nfd

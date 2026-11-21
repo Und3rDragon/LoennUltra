@@ -1,3 +1,5 @@
+local osUtils = require("utils.os")
+
 local threadHandler = {}
 
 threadHandler._threads = {}
@@ -25,6 +27,8 @@ local function cpathPrologue()
         return ""
     end
 
+    local extension = (osUtils.getOS() ~= "Windows") and "so" or "dll"
+
     local quoted = {}
 
     for _, directory in ipairs(directories) do
@@ -32,7 +36,7 @@ local function cpathPrologue()
     end
 
     return string.format(
-        "for _, dir in ipairs({%s}) do package.cpath = package.cpath .. \";\" .. dir .. \"/?.dll\" end\n",
+        "for _, dir in ipairs({%s}) do package.cpath = package.cpath .. \";\" .. dir .. \"/?." .. extension .. "\" end\n",
         table.concat(quoted, ", "))
 end
 

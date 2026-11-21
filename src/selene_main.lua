@@ -36,7 +36,8 @@ local function getInstallInformation()
     local installInfoLines = {
         string.format("Editor version: %s", meta.version),
         string.format("Love2d version: %d.%d.%d - %s", major, minor, revision, codename),
-        string.format("Operating system: %s", utils.getOS())
+        string.format("Operating system: %s", utils.getOS()),
+        string.format("Runtime arch: %s (luajit %s, jit %s)", tostring(jit and jit.arch), tostring(jit and jit.version), tostring(jit and jit.status()))
     }
 
     local installInfo = table.concat(installInfoLines, "\n")
