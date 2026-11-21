@@ -18,6 +18,7 @@
 /src/*.so
 /src/assets/tile_pack/*
 /docs/*
+*.bak
 
 # local handoff / memory notes
 /docs/handoff-*.md
