@@ -161,6 +161,17 @@
       ],
       "milestone": "v1.1.13",
       "body": "**现象**：Ultra 1.1.x 下，一批第三方编辑器插件的功能静默消失，同一插件在原版 Lönn 1.0.x 上工作正常。已确认两例：\n\n1. **触发器调色（Editor Color）** —— 原版在 *Editing Selections* 窗口里有 `Editor Color` 一行 + 颜色选择器，Ultra 里没有。该字段由 **LoennExtended** 的 `Loenn/libraries/patches/extraAttributeOrdering.lua:12-18` 注入（`fieldType=\"color\"`、`displayName=\"Editor Color\"`，属性名 `_editorColor`），`patches/colorCodeTriggers.lua:63-64` 用它画触发器边框。\n2. **View > Stylegrounds（地图内前后景实时预览）** —— 由 **AnotherLoennPlugin** 提供，Ultra 的 View 菜单里没有这个子菜单（详见 #2）。\n\n**根因一（最根本，影响所有旧插件）：`Loenn2` 隔离目录**\n- `src/mods.lua:34-46`：`isolatedPluginRoot = \"Loenn2\"`、`isolatedPluginCategories = { tools, [\"ui/windows\"], scenes }`、白名单 `isolatedPluginWhitelistFallback = { \"AltSidesHelper\" }`\n- `src/mods.lua:106-121` 的 `getPluginRoots()`：对隔离类别**只返回 `Loenn2`**，白名单 mod 才额外加 `Loenn`\n- **关键在 `:108`：`libraries` 也被算进隔离** ⇒ 除 `AltSidesHelper` 外，所有 mod 的 `Loenn/libraries`、`Loenn/tools`、`Loenn/ui/windows`、`Loenn/scenes` 都不再加载；`Loenn/entities`、`triggers`、`effects`、`lang` 仍照旧\n- 设计意图见 `:30-33` 注释（编辑器插件不得干扰内容扩展与编辑器本体），但对现有插件是**静默破坏**：run.log 里没有任何相关行、不报错\n\n**根因二（即使目录对了也会被拒）：插件自己的版本上限**\n- `LoennExtended/Loenn/libraries/settings.lua:59-68`：`nextBrokenLonnVersion = v(\"1.1\")`，`enabled()` 对 1.1.x 返回 false，注释写着 `-- crashes`\n- `AnotherLoennPlugin/Loenn/libraries/main.lua:32-41`：`supportedLoennVersion = 1.0.0`，上限 `{1,1,0}`，`>= 1.1.0` 直接 `return {}`\n\n**想确认 / 建议**\n1. `Loenn2` 隔离是有意破坏兼容的设计吗？有没有迁移文档或公告？目前的表现是“插件静默失效”，用户很难自己发现原因。\n2. 是否可提供兼容方式，例如设置项 `plugins.legacyLoennFolder`（开启后隔离类别也从 `Loenn/` 读），或对检测到的旧插件在日志/通知里明确提示「该插件未适配 Loenn2 目录」。\n3. 是否可在 README 里列出「已适配 Loenn2」与「尚未适配」的插件清单，方便玩家自查。\n\n**本地临时方案（已验证可行，只改玩家侧 mod）**：把插件的 `Loenn/libraries` 复制成 `Loenn2/libraries`，并把版本门槛 `1.1` 改成 `1.2`。"
+    },
+    {
+      "title": "只提供 en_gb.lang 的插件在中文界面下全部显示 %unknown%",
+      "labels": [
+        "bug",
+        "platform: all",
+        "priority: high"
+      ],
+      "milestone": "v1.1.12",
+      "state": "closed",
+      "body": "**现象**：界面设为中文后，所有只提供 `en_gb.lang` 的第三方插件（`AltSidesHelper` 的元数据窗口、`AnotherLoennPlugin` 的 Stylegrounds 子项、`CameraSim` 的视图菜单项等）全部显示成 `%unknown%`；Ultra 自身的中文界面正常，插件也能正常打开。\n\n**根因**：`src/scenes/startup.lua:63` 写的是\n\n```lua\nlanguageRegistry.setFallbackLanguage(defaultConfig.general.language)\n```\n\n而 `defaultConfig.general.language` 已被改为 `zh_cn`（\"出厂默认中文\"那条改动）。于是**当前语言和 fallback 都是 `zh_cn`**，插件只提供 `en_gb.lang`，`utils/lang.lua:31-42` 的 `lang_mt.__index` 到 fallback 里也找不到，返回 `nil_lang`，其 `__tostring` 得到 `%unknown%`（`utils/lang.lua:11-20`）。\n\n原版 Lönn 1.0.10 的 `startup.lua` 没有这行 `setFallbackLanguage`，所以原版不受影响。\n\n**修法**：fallback 固定为 `en_gb`——`en_gb.lang` 是本体与所有插件的基础语言，不该跟着\"默认语言\"走。\n\n**判据**：\n- 中文界面下 `AltSidesHelper` 元数据窗口里 `Preset` / `UnlockMode` / `Icon` / `Label` 等变成正常英文；\n- `CameraSim` 的视图菜单项显示\"镜头模拟器\"（它自带 `zh_cn.lang`）；\n- `AnotherLoennPlugin` 的 Stylegrounds 子项显示 `Background` / `Foreground` / `Snap to Room` / `Animate`（英文，因为该插件只提供 en_gb）。"
     }
   ]
 }
