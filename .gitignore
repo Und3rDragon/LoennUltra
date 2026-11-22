@@ -30,3 +30,7 @@
 /publish_template/**.bak2
 !/.github
 *.bak.*
+!/README.en.md
+!/docs/
+!/docs/examples/
+!/docs/examples/*.png

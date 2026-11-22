@@ -2,7 +2,7 @@
 
 # Loenn Ultra
 
-基于 [Lönn](https://github.com/CelestialCartographers/Loenn) 的 Celeste 地图编辑器分支。保留原版全部功能，在此基础上改善中文支持、macOS Apple Silicon 支持、素材面板的信息展示、大图性能与插件兼容性。
+Loenn Ultra 是 Celeste 地图编辑器 [Lönn](https://github.com/CelestialCartographers/Loenn) 的一个分支，fork 自 [LuckyBoy-7/Loenn](https://github.com/LuckyBoy-7/Loenn) 的 `better-loenn` 分支（v1.1.10）。保留原版全部功能，在此基础上改善中文支持、macOS Apple Silicon 支持、素材面板的信息展示、大图性能与插件兼容性。
 
 - 仓库：<https://github.com/djgrayon/LoennUltra>
 - 下载：<https://github.com/djgrayon/LoennUltra/releases>
@@ -134,9 +134,33 @@ chmod +x Lönn.sh
 
 ## 界面截图
 
+主窗口：中文界面，右侧为素材面板。
+
 ![主窗口](docs/examples/example1.png)
 
-![房间](docs/examples/example2.png)
+房间编辑：选中房间中的触发器后，右侧列出可用实体并显示预览图。
+
+![房间编辑](docs/examples/example2.png)
+
+设置窗口（编辑器页）：可切换语言、界面字体与界面缩放。
+
+![设置窗口](docs/examples/example3.png)
+
+素材面板：实体按 mod 分组，选中条目时显示预览图。
+
+![素材面板](docs/examples/example4.png)
+
+滤镜预览：以缩略图网格浏览可用的滤镜贴图。
+
+![滤镜预览](docs/examples/example5.png)
+
+Stylegrounds 面板：选中条目时显示预览与属性。
+
+![Stylegrounds 面板](docs/examples/example6.png)
+
+依赖窗口：左侧为当前地图缺失的依赖，右侧为可用 mod。
+
+![依赖窗口](docs/examples/example7.png)
 
 ## 反馈
 
@@ -145,7 +169,14 @@ chmod +x Lönn.sh
 
 ## 关于本分支
 
-本分支基于 Lönn 上游 `ui-olympUI` 分支开发，保留原版全部功能。它是由社区维护的非官方分支，与 Celeste 开发团队及原版 Lönn 作者均无隶属关系。原版 Lönn 的问题请提交至原仓库。
+### 代码来源
+
+- 上游项目：Lönn（[CelestialCartographers/Loenn](https://github.com/CelestialCartographers/Loenn)）
+- 直接上游：[LuckyBoy-7/Loenn](https://github.com/LuckyBoy-7/Loenn) 的 `better-loenn` 分支，fork 点为该分支的 `v1.1.10`（提交 `b084a59`）
+- 该 `better-loenn` 分支本身基于 Lönn 上游的 `ui-olympUI` 分支
+- 本仓库：`djgrayon/LoennUltra` 的 `better-loenn` 分支；`v1.1.10` 之后的改动均由本仓库维护
+
+本分支由社区维护，属于非官方分支，与 Celeste 开发团队、原版 Lönn 作者、`better-loenn` 分支作者均无隶属关系。原版 Lönn 的问题请提交至原仓库；`better-loenn` 分支自身的问题请提交至该分支所在仓库。
 
 原版 Lönn 是 [Ahorn](https://github.com/CelestialCartographers/Ahorn) 的后继项目，后者基于 [Maple](https://github.com/CelestialCartographers/Maple)。
 
