@@ -1,198 +1,171 @@
-# Lönn
+[English](README.en.md) | **中文**
 
-[discord-map-making]: https://discord.gg/Wtjf4Pb "Join #map_making on the 'Mt. Celeste Climbing Association' Discord server"
-[ahorn]: https://github.com/CelestialCartographers/Ahorn "The Ahorn Map Editor"
-[maple]: https://github.com/CelestialCartographers/Maple "The Maple Map Editing Library"
+# Loenn Ultra
 
-[![discord](https://img.shields.io/discord/403698615446536203.svg?color=7289da&logo=discord&logoColor=ffffff)][discord-map-making]
-[![downloads](https://img.shields.io/github/downloads/CelestialCartographers/Loenn/total.svg)](https://github.com/CelestialCartographers/Loenn/releases)
-[![Latest Version](https://img.shields.io/github/tag/CelestialCartographers/Loenn.svg?label=version)][latest-release]
-[![License](https://img.shields.io/github/license/CelestialCartographers/loenn.svg)](LICENSE)
+基于 [Lönn](https://github.com/CelestialCartographers/Loenn) 的 Celeste 地图编辑器分支。保留原版全部功能，在此基础上改善中文支持、macOS Apple Silicon 支持、素材面板的信息展示、大图性能与插件兼容性。
 
-(we're in `#map_making` on the "Mt. Celeste Climbing Association" Discord server)
+- 仓库：<https://github.com/djgrayon/LoennUltra>
+- 下载：<https://github.com/djgrayon/LoennUltra/releases>
 
 ---
 
-Lönn is a visual level maker and editor for the game Celeste. It allows editing map binaries, creating new ones, adding rooms, and filling the rooms with anything your heart desires (as long as what your heart desires is possible within the realms of the game).
-The generated map binaries can be loaded in the stock game or using [Everest](https://everestapi.github.io/), although the use of Everest is highly recommended. For use without Everest, you can replace a map in `Content/Maps` (remember backups), otherwise, you can place it in `Mods/<yourmodname>/Maps` with Everest and use the custom chapter loading (refer to the [Mod Structure guide](https://github.com/EverestAPI/Resources/wiki/Mod-Structure)).
+## 与上游 Lönn 的差异
 
-The program is still under active development. If you find something that you would like to see in the program, please let us know so that it may be added some time in the future. If you spot a bug or the program crashes, please report it.
+### 平台支持
 
-Lönn is a successor to [Ahorn][ahorn], a visual level maker based on [Maple][maple]. If you want to be able to generate and edit maps using code, give Maple a try.
+- **macOS（Apple Silicon）**：macOS 包改用 LÖVE 11.5 universal 引擎；`Lönn.app` 启动脚本检测到 Apple Silicon 时通过 `arch -arm64` 以原生架构启动，避免此前整棵进程树被 Rosetta 按 x86_64 拉起。该问题会导致编辑后持续卡顿、大型地图保存无法完成。启动日志会输出 `Runtime arch: <arch>` 可供确认。
+- **macOS**：`nfd.so` 更换为 x86_64 + arm64 通用二进制，Intel Mac 与 Apple Silicon 均可使用。
+- **macOS**：按 arm64 ABI 修正 `lfs_ffi.lua` 中 `dirent` 结构体的字段宽度，修复目录枚举出现空名或乱码文件名。
+- **Linux**：修正 `utils/filesystem.lua` 与 `utils/threads.lua` 将非 Windows 平台判为 Windows 的问题，文件对话框依赖库（`nfd.so` / `nfd_zenity.so`）现可正常加载。
 
-This project is an unofficial map maker and level editor, it is merely a fan project trying to enable map development in the most user-friendly way we can think of. None of this code is developed by or connected to the Celeste development team, but we thank the team for supporting our projects.
+### 新增
 
-## Installation
+- 文件菜单新增「关闭」：关闭当前地图但不退出编辑器；存在未保存改动时弹出保存确认，关闭后可继续打开其他地图。
+- 信息面板：按 `~` 打开，显示光标坐标、当前房间名与画布缩放倍率。
+- Debug 工具支持按名称查找实体与触发器，并可直接传送至其位置。
+- 新增 14 个脚本，均支持多选（名称与界面显示一致）：
+  - **Change Attributes**：把某一类型的所有实体改为另一种类型。
+  - **String Replace in Entity/Trigger**：批量替换实体/触发器某个属性中的子串。
+  - **Convert Fillers to Rooms**：把原版 filler 转换为房间，砖块取自相邻房间。
+  - **Flip Room**：翻转房间内容或房间位置。
+  - **Create Template Mod**：新建 mod 文件夹，含空白地图与默认的 Celeste XML 文件。
+  - **Export to Zip**：更新 mod 版本并导出整个 mod 文件夹为 zip。
+  - **Transfer Used Decals**：把地图用到的 decal 从其他 mod 复制进当前 mod。
+  - **Get Decal Credits** / **Get Default Tile Credits**：汇总地图所用 decal / 默认 tileset 所属的 mod，用于撰写致谢。
+  - **Auto Add Background Tiles** / **Auto Add Background Tiles Around**：生成并填充背景砖，或在前景砖边缘与 spinner 周围补背景砖。
+  - **Auto Add Filler**：沿房间边缘扩展实心砖，并生成整砖 filler 房间。
+  - **Add Spikes Around Object**：沿实体周围或前景砖区域轮廓添加刺。
+  - **Add Spinners In Area**：在圆形区域内批量添加 spinner，右键可复制现有 spinner 的配置。
+- 素材面板支持分级样式与预览图：decal、trigger、entity、tile 条目均可在列表中查看对应预览。
+- Stylegrounds 面板支持直接拖拽添加 effect，拖拽过程有位置反馈。
+- 面板条目支持拷贝资源路径、在文件管理器中打开资源所在目录。
+- 字体支持自定义字号，界面字体与地图文字字体可分别设置。
+- 支持系统输入法的候选词窗口与拼音预编辑，可在搜索框与属性输入框中正常输入中文。
+- 收藏的条目会标注其来源 mod。
 
-[latest-release]: https://github.com/CelestialCartographers/Loenn/releases/latest
+### 改进
+
+- 地图加载改为多线程；mod 的 zip 包按需挂载；新增 Selene→Lua 编译结果缓存。
+- 出厂默认语言设为中文；使用非中文界面时，加载画面首次出现可切换语言的提示。
+- 通知栏移至工作区右下角，不再横跨窗口。
+- 各类列表支持拖拽排序，条目间增加间距，文件路径按 VS Code 风格显示。
+- 过长的 trigger 文本自动换行。
+- 画布缩放倍率调整为 √2。
+- 新增快捷键：`x` 切换当前/上一个工具，`Tab` 隐藏侧边栏，`f` / `b` 将选中 decal 切换至前景/背景。
+
+### 修复
+
+- **保存**：写盘失败后保存锁未释放，导致该地图后续所有保存无限等待；现会释放并报告失败原因。
+- **保存**：写盘失败时静默跳过、无任何提示。
+- **撤销**：bucket 的 all rooms 模式批量换砖后，一次撤销仅回退部分房间。
+- **撤销**：撤销后画布仍显示旧内容。
+- **渲染**：在图层列表中选中某一层后，该层内容不显示。
+- **渲染**：`drawScreenText` 在 drawable 缺少宽高时崩溃（含 ExCameraDynamics `CameraReferenceFrame` 的地图缩放后必现）。
+- **导出**：`地图 > 保存地图图片` 点击保存后崩溃。
+- **导出**：`地图 > 保存地图图片` 只导出当前房间。
+- **本地化**：仅提供 `en_gb.lang` 的插件在中文界面下全部显示为 `%unknown%`。
+- **插件**：`Loenn2/` 隔离目录导致未迁移的旧插件静默失效（菜单无入口、日志无输出）。
+- **插件**：`requireFromPlugin` 失败返回 `nil`，导致依赖它的插件启动时崩溃。
+- **插件**：`drawableFunction` 截断插件追加的参数，导致 `sprite` 为 `nil`。
+- **选择**：多选场景下 `isItemSelected` 遍历了错误的集合。
+- **Linux**：文件对话框无法弹出。
+
+### 已知问题
+
+- 关闭地图后的空白界面中，中文提示文字不显示（该界面使用不含中文字形的像素字体渲染）。
+
+---
+
+## 安装
 
 ### Windows
 
-Download the [latest release][latest-release] for Windows and extract the `.zip` file you get into an empty directory. Run `Lönn.exe` to start the program.
+下载 `LoennUltra-<版本>-windows.zip`，解压至空目录，运行 `Lönn.exe`。
 
-### MacOS
+### macOS
 
-Download the [latest release][latest-release] for MacOS and extract the `.zip` file you get into an empty directory (Safari might do this automatically). Launch the extracted `Lönn` app to start the program.
+下载 `LoennUltra-<版本>-macos.zip`，解压得到 `Lönn.app`。
 
-### Other Operating Systems
+首次运行时若被系统拦截，在终端执行：
 
-First, [install love2d](https://love2d.org/). Lönn requires love2d version 11.3 or later; make sure to download love2d from the official website. Also make sure that the `love` command is in your `PATH`.
+```bash
+xattr -dr com.apple.quarantine /路径/到/Lönn.app
+chmod +x /路径/到/Lönn.app/Contents/MacOS/*.sh
+```
 
-Download the [latest release][latest-release] for your operating system and extract the `.zip` file you get into an empty directory. Launch `Lönn.sh` to start the program, or run it directly using `love Lönn.love`.
+### Linux
 
-On systems that support AppImage, download the AppImage file in the [latest release][latest-release]. Execute the file to launch Lönn.
+下载 `LoennUltra-<版本>-linux.zip`，解压后执行：
 
-## Usage
+```bash
+chmod +x Lönn.sh
+./Lönn.sh
+```
 
-The tools in Lönn are shown on the right, just select one to use it.
-Hold right click to move around the map. Left click is your main way of placing objects or selecting things. Tools like rectangle placement require holding left click while moving across the screen. Scroll to zoom.
-
-In any menu, you can hover over the name of an option or field for a detailed tooltip explaining its meaning and usage. Some objects you can right click to open menus for further options.
-
-Lönn supports a couple of keybinds and special mouse functionality, with more to come. The following list might not be comprehensive. Note that you can change all keybinds in the settings window or the configuration file.
+压缩包内已包含 `nfd.so` 与 `nfd_zenity.so`。
 
 ---
 
-#### General Controls
+## 从原版 Lönn 迁移
 
- - Ctrl + N: New map
- - Ctrl + O: Open map
- - Drag & drop map file into main window: Open map
- - Ctrl + S: Save map
- - Ctrl + Shift + S: Save map as...
- - Ctrl + T: New room
- - Ctrl + Shift + T: Configure current room
- - Alt + Arrow keys: Move room (step size 8)
- - Alt + Delete: Delete room
- - Ctrl + Z: Undo action
- - Ctrl + Shift + Z: Redo action
- - Scroll wheel: Zoom
- - Ctrl + ➕ (plus): Zoom in
- - Ctrl + ➖ (minus): Zoom out
- - Double middle click: Zoom to map extents
- - F11: Toggle fullscreen
- - Arrow keys: Navigate lists
+- 配置文件独立：本分支使用 `loenn2-settings.conf`，不会覆盖原版的 `settings.conf`；首次启动时会从原版配置迁移一次。
+- 语言设置位于 Settings → General → Language。
+- 插件加载优先读取 mod 的 `Loenn2/` 目录，该目录不存在时回退至原版使用的 `Loenn/`，现有插件通常无需修改。
 
- #### Tools
+## 快捷键
 
- - Left click: Select tool, material, or object
- - Double Left click material or object: Add material or object to favourites
- - Left click layer or group: Select active layer or group
- - Double Left click layer or group: Toggle visibility
- - Right click layer or group: Add, rename, or delete groups
- - Left click visibility icon on layer or group: Toggle visibility
+操作方式与原版一致。以下为常用项，全部可在 Settings → Hotkeys 中修改：
 
- #### Placements
+| 快捷键 | 作用 |
+|---|---|
+| `Ctrl + S` / `Ctrl + Shift + S` | 保存 / 另存为 |
+| `Ctrl + Z` / `Ctrl + Shift + Z` | 撤销 / 重做 |
+| `Ctrl + T` / `Ctrl + Shift + T` | 新建房间 / 配置当前房间 |
+| `Alt + 方向键` | 移动房间 |
+| `Ctrl + A` / `Ctrl + Shift + A` | 全选 / 取消选择 |
+| `Ctrl + C` / `Ctrl + X` / `Ctrl + V` | 复制 / 剪切 / 粘贴 |
+| `Q` / `E`、`A` / `D` | 调整宽度、高度（按住 `Ctrl` 为 1 像素步进） |
+| `L` / `R`、`V` / `H` | 旋转、翻转 |
+| `~` | 信息面板 |
+| `Tab` | 隐藏侧边栏 |
+| `x` | 切换当前/上一个工具 |
+| 滚轮 | 缩放画布 |
+| 按住右键拖动 | 平移视图 |
 
- - Left click: Place object
- - Holding Ctrl + Left click: Place object (use 1 as step size instead of 8 for more fine-grained control)
- - Right click: Open properties of object under cursor
- - Left click & drag: Adjust size of resizeable objects while placing
- - Middle click: Clone object under cursor
- - Q, E: Shrink / grow width
- - A, D: Shrink / grow height
- - L, R: Rotate supported objects counter-clockwise / clockwise
- - V, H: Flip supported objects vertically / horizontally
+## 界面截图
 
- #### Selections
+![主窗口](docs/examples/example1.png)
 
- - Left click: Select object
- - Left click existing selection: Cycle through objects under cursor (smallest to largest)
- - Shift + Double Left click: Select all similar objects
- - Ctrl + Shift + Double Left click: Select all similar objects but more strict
- - Left click & drag: Select multiple objects
- - Shift + Left click & drag: Add to current selection
- - Ctrl + A: Select all objects
- - Ctrl + Shift + A: Clear current selection
- - Right click selection: Open properties of selected object(s)
- - Holding Left mouse button over selection: Drag selected objects
- - Shift + Holding Left mouse button over selection: Axis-bound object dragging
- - Arrow keys: Move selected objects
- - Q, E: Shrink / grow width on selected objects
- - A, D: Shrink / grow height on selected objects
- - Holding Ctrl + any of the above: use 1 as step size instead of 8 for more fine-grained control
- - L, R: Rotate supported objects counter-clockwise / clockwise
- - V, H: Flip supported objects vertically / horizontally
- - Shift + V / Shift + H: Flip selected area vertically / horizontally
- - N on entity/trigger: Add starting node to entity/trigger
- - N on node: Add node to entity/trigger after selected node
- - Delete: Delete selected objects
- - Ctrl + C: Copy selection to clipboard
- - Ctrl + X: Cut selection to clipboard
- - Ctrl + V: Paste selection from clipboard
+![房间](docs/examples/example2.png)
 
-#### Brushes
+## 反馈
 
- - Left click: Place tiles
- - Left click & drag: Drag brush
- - Middle click: Change material to tile under cursor
+- 问题与建议提交至本仓库 [Issues](https://github.com/djgrayon/LoennUltra/issues)。提交时请说明操作步骤、预期结果与实际结果，并尽量附上 `run.log`。
+- `run.log` 位置：Windows `%LOCALAPPDATA%\Loenn\run.log`，macOS `~/Library/Application Support/Loenn/run.log`。
 
-#### Stylegrounds
+## 关于本分支
 
- - Arrow keys: Navigate list
- - Alt + Arrow keys: Rearrange Stylegrounds
+本分支基于 Lönn 上游 `ui-olympUI` 分支开发，保留原版全部功能。它是由社区维护的非官方分支，与 Celeste 开发团队及原版 Lönn 作者均无隶属关系。原版 Lönn 的问题请提交至原仓库。
 
-#### Debug - For developers
+原版 Lönn 是 [Ahorn](https://github.com/CelestialCartographers/Ahorn) 的后继项目，后者基于 [Maple](https://github.com/CelestialCartographers/Maple)。
 
- - F5: Reload entities and triggers
- - F6: Clear rendering cache and redraw map
- - F7: Reload tools
- - Ctrl + F5: Reload everything
- - Ctrl + Shift + F5: Restart Lönn
+## 许可
 
-If you have any question, [**ask us in `#map_making` on Discord**][discord-map-making] so we may add it to this README file. Thanks for being interested in making maps for Celeste!
+本项目源代码与资源（除下方列出的例外）沿用 Lönn 的 [MIT 许可](LICENSE)。
 
-## Some pictures
+Lönn 的 logo 版权归原作者所有，仅可随原版软件分发。若基于本项目二次开发，请使用自己的名称与标识，避免与原版 Lönn 混淆。
 
-Lönn's main window
-![The main window](docs/examples/example1.png)
+本项目包含并使用以下开源项目：
 
-Close-up of a room
-![Showing selections](docs/examples/example2.png)
+- [dkjson](https://github.com/LuaDist/dkjson)
+- [lua-yaml](https://github.com/exosite/lua-yaml)
+- [luafilesystem 的 FFI 实现](https://github.com/sonoro1234/luafilesystem)
+- [luajit-request 的一个 fork](https://github.com/Vexatos/luajit-request)
+- [Selene](https://github.com/Vexatos/Selene)
+- [xml2lua](https://github.com/manoelcampos/Xml2Lua)
 
-## Frequently Asked Questions
+依赖：
 
-**Why do so many things in the program have weird names?**
-
-Most of these are the names internally used by the game, so blame the devs. Most of them do not have any official names, but we tried to make the names in Lönn as descriptive as possible.
-
-**Is it safe to resave maps from the base Celeste game?**
-
-No. If something is not visible in Lönn, it is still there in data and will be saved along with it. However, the program is currently still unable to save 100% of the original maps back, only about 99%. As always, make backups.
-
-**How to I make room transitions?**
-
-A player is able to move from one room to another if the rooms are directly adjacent and there is at least one spawn point (Player entity) in each room.
-
-**So, I made a map. What now? How do I load it?**
-
-While you can load maps without, it is _highly_ recommended to install [Everest](https://github.com/EverestAPI/Everest). Once Everest is installed, place your map binary in `Mods/<yourmodname>/Maps` in your Celeste installation directory. It should now be accessible from inside the game. Refer to the [Mod Structure guide](https://github.com/EverestAPI/Resources/wiki/Mod-Structure) for details.
-
-**I am a mod developer. Why does my mod not show up in Lönn?**
-
-Mod developers will have to add compatible Lönn plugins to their mods. Refer to [the Lönn wiki](https://github.com/CelestialCartographers/Loenn/wiki) for details.
-
-**Something is broken!**
-
-That's not a question, but please report any bug you find!
-
-## License
-
-The project's source code and assets, other than the exceptions stated below, are developed and licensed under the [MIT license](LICENSE).
-
-The Lönn logo has All Rights Reserved and may only be distributed with original copies of this software. Should you fork the project, do not use the original logo in any way. We would also prefer if you changed the project's name so that it can not be confused with the original.
-
-Lönn contains and uses code from the following projects:
-  * [dkjson](https://github.com/LuaDist/dkjson)
-  * [lua-yaml](https://github.com/exosite/lua-yaml)
-  * [An ffi implementation](https://github.com/sonoro1234/luafilesystem) of [luafilesystem](https://github.com/keplerproject/luafilesystem)
-  * [A fork](https://github.com/Vexatos/luajit-request) of [luajit-request](https://github.com/LPGhatguy/luajit-request)
-  * [Selene](https://github.com/Vexatos/Selene)
-  * [xml2lua](https://github.com/manoelcampos/Xml2Lua)
-
-Lönn also depends on the following projects:
-  * [LÖVE](https://love2d.org/)
-  * [A fork](https://github.com/Vexatos/nativefiledialog/tree/master/lua) of [lua bindings](https://github.com/Alloyed/nativefiledialog/tree/master/lua) for [nativefiledialog](https://github.com/mlabbe/nativefiledialog)
-  * [libcurl](https://curl.se/libcurl/)
-
-Many thanks go to these projects.
+- [LÖVE](https://love2d.org/)
+- [nativefiledialog 的 lua 绑定 fork](https://github.com/Vexatos/nativefiledialog/tree/master/lua)
+- [libcurl](https://curl.se/libcurl/)
