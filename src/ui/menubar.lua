@@ -331,8 +331,14 @@ local function wrapInSubmenuClosers(menu)
                     end
 
                     if shouldCloseMenu ~= false then
-                        if self.parent:is("menuItemSubmenu") then
-                            self.parent:removeSelf()
+                        local submenu = self.parent
+
+                        if submenu and submenu:is("menuItemSubmenu") then
+                            if submenu.hasScrollbox and submenu.parent then
+                                submenu.parent:removeSelf()
+                            end
+
+                            submenu:removeSelf()
                         end
                     end
                 end
