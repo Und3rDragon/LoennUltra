@@ -5717,6 +5717,27 @@ function toolWindow.getWindow()
     -- be able to take focus.
     materialList.scrolledList.keepInputFocus = true
 
+    local defaultLayerGetIsSelected = layerList.getIsSelected
+
+    layerList.getIsSelected = function(self, element)
+        if toolHandler.currentToolName == "selection" and element.itemData and element.itemData.baseLayer then
+            local selectionTool = toolHandler.tools.selection
+
+            if selectionTool and selectionTool.isLayerSelected then
+                local baseLayer = element.itemData.baseLayer
+                local subLayer = element.itemData.subLayer
+
+                if subLayer == nil or subLayer == -1 then
+                    return selectionTool.isLayerSelected(baseLayer)
+                end
+
+                return selectionTool.isLayerSelected(baseLayer) and selectionTool.subLayer == subLayer
+            end
+        end
+
+        return defaultLayerGetIsSelected(self, element)
+    end
+
     -- The magic list scrolls by a fixed element size, which getMaterialItems keeps in sync with
     -- the current layer
     hotkeyHandler.addHotkey("global", configs.ui.hotkeys.focusMaterialSearch, focusMaterialSearchHandler)
