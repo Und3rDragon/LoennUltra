@@ -132,7 +132,7 @@ local function handleAllRoomsClick(clickedMaterial)
 
             for ty = 1, height do
                 for tx = 1, width do
-                    if layerTiles.matrix:get(tx, ty) == clickedMaterial then
+                    if layerTiles.matrix:get(tx, ty) == clickedMaterial and clickedMaterial ~= tool.material then
                         matrix:set(tx, ty, tool.material)
                         changed = true
                     end

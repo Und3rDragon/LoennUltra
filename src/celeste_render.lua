@@ -1302,7 +1302,7 @@ end
 function celesteRender.forceRedrawRoom(room, state, selected)
     local viewport = state.viewport
 
-    celesteRender.invalidateRoomCache(room, {"canvas", "complete"})
+    celesteRender.invalidateRoomCache(room)
     celesteRender.forceRoomBatchRender(room, state)
     celesteRender.forceRoomCanvasRender(room, state, selected)
 end
