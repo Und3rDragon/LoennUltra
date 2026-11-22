@@ -159,23 +159,39 @@ end
 -- TODO - Move over to modal when those are implemented
 function notificationHandlers:editorQuitWithChanges(quitArg)
     local language = languageRegistry.getLanguage()
+    local closingMap = type(quitArg) == "table" and quitArg.closeMap and true or false
 
     notifications.notify(function(popup)
+        local function finish()
+            if closingMap then
+                loadedState.doCloseMap()
+                popup:close()
+
+            else
+                love.event.quit(quitArg)
+            end
+        end
+
+        local notificationLanguage = language.ui.notifications
+        local messageKey = closingMap and notificationLanguage.editorCloseMapWithChanges or notificationLanguage.editorQuitWithChanges
+        local saveButtonKey = closingMap and notificationLanguage.editorSaveAndClose or notificationLanguage.editorSaveAndQuit
+        local discardButtonKey = closingMap and language.ui.button.close or language.ui.button.quit
+
         return uiElements.column({
-            uiElements.label(tostring(language.ui.notifications.editorQuitWithChanges)),
+            uiElements.label(tostring(messageKey)),
             uiElements.row({
-                uiElements.button(tostring(language.ui.notifications.editorSaveAndQuit), function()
+                uiElements.button(tostring(saveButtonKey), function()
                     loadedState.saveCurrentMap(function(filename)
                         loadedState.defaultAfterSaveCallback(filename, loadedState)
 
-                        love.event.quit(quitArg)
+                        finish()
                     end)
                 end),
-                uiElements.button(tostring(language.ui.button.quit), function()
+                uiElements.button(tostring(discardButtonKey), function()
                     -- Update history to think we have no changes
                     history.madeChanges = false
 
-                    love.event.quit(quitArg)
+                    finish()
                 end),
                 uiElements.button(tostring(language.ui.button.cancel), function()
                     popup:close()

@@ -233,6 +233,7 @@ menubar.menubar = {
         {"save", loadedState.saveCurrentMap},
         {"save_as", loadedState.saveAsCurrentMap},
         {},
+        {"close", loadedState.closeMap},
         {"exit", love.event.quit}
     }},
     {"edit", {

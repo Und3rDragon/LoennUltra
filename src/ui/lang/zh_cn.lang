@@ -8,6 +8,7 @@ ui.button.yes=是
 ui.button.no=否
 ui.button.confirm=确认
 ui.button.cancel=取消
+ui.button.close=关闭
 ui.button.quit=退出
 
 # Notifications
@@ -25,6 +26,8 @@ ui.notifications.editorLoadWithChanges=还有未保存的修改。\n确定要加
 ui.notifications.editorNewWithChanges=还有未保存的修改。\n确定要新建地图吗？
 ui.notifications.editorDeleteRoom=确定要删除这个房间吗？
 ui.notifications.editorSaveAndQuit=保存并退出
+ui.notifications.editorCloseMapWithChanges=还有未保存的修改。\n确定要关闭当前地图吗？
+ui.notifications.editorSaveAndClose=保存并关闭
 ui.notifications.teleportFailed=传送失败，Celeste 是否正在运行且安装了 Everest？
 ui.notifications.editorSaveFirst=保存
 ui.notifications.editorDiscardChanges=不保存
@@ -620,6 +623,7 @@ ui.menubar.open=打开
 ui.menubar.recent=最近
 ui.menubar.save=保存
 ui.menubar.save_as=另存为
+ui.menubar.close=关闭
 ui.menubar.exit=退出
 ui.menubar.edit=编辑
 ui.menubar.undo=撤销

@@ -637,4 +637,57 @@ state.onlyShowDependedOnMods = {}
 state.showRoomBorders = true
 state.showRoomBackground = true
 
+function state.doCloseMap()
+    local celesteRender = require("celeste_render")
+
+    celesteRender.invalidateRoomCache()
+    celesteRender.clearBatchingTasks()
+
+    history.reset()
+
+    if not state.closeMapHistoryGuard then
+        state.closeMapHistoryGuard = true
+
+        local realUndo = history.undo
+        local realRedo = history.redo
+
+        history.undo = function()
+            if state.map then
+                realUndo()
+            end
+        end
+
+        history.redo = function()
+            if state.map then
+                realRedo()
+            end
+        end
+    end
+
+    state.filename = nil
+    state.side = nil
+    state.map = nil
+    state.subLayers = nil
+    state.selectedItem = nil
+    state.selectedItemType = nil
+
+    windowTitleUtils.updateWindowTitle(state)
+    sceneHandler.changeScene("Editor")
+    sceneHandler.sendEvent("editorMapClosed")
+end
+
+function state.closeMap()
+    if not state.side then
+        return
+    end
+
+    if history.madeChanges then
+        sceneHandler.sendEvent("editorQuitWithChanges", { closeMap = true })
+
+        return
+    end
+
+    state.doCloseMap()
+end
+
 return state
