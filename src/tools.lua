@@ -50,6 +50,18 @@ local function selectPreviousTool()
     end
 end
 
+local function toggleToolbarHotkey()
+    local success, toolsWindow = pcall(require, "ui/windows/tools")
+
+    if success and toolsWindow and toolsWindow.toggleToolbar then
+        toolsWindow.toggleToolbar()
+    end
+end
+
+-- Exposed so the menu bar can reuse them instead of duplicating the logic
+toolHandler.selectPreviousTool = selectPreviousTool
+toolHandler.toggleToolbar = toggleToolbarHotkey
+
 function toolHandler.addHotkeys(hotkeyHandler)
     for name, _ in pairs(toolHandler.tools) do
         local nameHumanized = utils.humanizeVariableName(name)
@@ -67,14 +79,6 @@ function toolHandler.addHotkeys(hotkeyHandler)
     end
 
     hotkeyHandler.addHotkey("tools", previousHotkey or "s", selectPreviousTool)
-
-    local function toggleToolbarHotkey()
-        local success, toolsWindow = pcall(require, "ui/windows/tools")
-
-        if success and toolsWindow and toolsWindow.toggleToolbar then
-            toolsWindow.toggleToolbar()
-        end
-    end
 
     local toolbarHotkey = configs.hotkeys.toggleToolbar or "tab"
 

@@ -5154,6 +5154,13 @@ local function getTileToolItems()
 
         if tool then
             local displayName = getLanguageOrDefault(toolNames[name], name)
+            local hotkeySuffix = language.ui.tools_window and language.ui.tools_window.hotkey_suffix
+            local toolHotkey = configs.hotkeys["selectTool" .. utils.humanizeVariableName(name)]
+
+            if hotkeySuffix and toolHotkey then
+                displayName = displayName .. string.format(tostring(hotkeySuffix), tostring(toolHotkey))
+            end
+
             local tooltipText = getLanguageOrDefault(toolDescriptions[name])
 
             local item = uiElements.listItem({
@@ -5320,8 +5327,16 @@ local function getToolItems(sortItems)
     local toolNames = language.tools.name
     local toolDescriptions = language.tools.description
 
+    local tileGroupName = getLanguageOrDefault(toolNames.tile, "Tile")
+    local tileGroupSuffix = language.ui.tools_window and language.ui.tools_window.hotkey_suffix
+    local tileGroupHotkey = configs.hotkeys["selectTool" .. utils.humanizeVariableName(tileToolNames[1])]
+
+    if tileGroupSuffix and tileGroupHotkey then
+        tileGroupName = tileGroupName .. string.format(tostring(tileGroupSuffix), tostring(tileGroupHotkey))
+    end
+
     local tileGroupItem = uiElements.listItem({
-        text = getLanguageOrDefault(toolNames.tile, "Tile"),
+        text = tileGroupName,
         data = "tile"
     })
 
@@ -5340,6 +5355,13 @@ local function getToolItems(sortItems)
     for name, tool in pairs(tools) do
         if not tileToolSet[name] then
             local displayName = getLanguageOrDefault(toolNames[name], name)
+            local hotkeySuffix = language.ui.tools_window and language.ui.tools_window.hotkey_suffix
+            local toolHotkey = configs.hotkeys["selectTool" .. utils.humanizeVariableName(name)]
+
+            if hotkeySuffix and toolHotkey then
+                displayName = displayName .. string.format(tostring(hotkeySuffix), tostring(toolHotkey))
+            end
+
             local tooltipText = getLanguageOrDefault(toolDescriptions[name])
 
             local item = uiElements.listItem({
