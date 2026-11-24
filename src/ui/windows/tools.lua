@@ -586,7 +586,7 @@ local function getPathTreeItems(materials, currentTool, currentLayer, favoritesL
                 segments = options.flat and {} or splitDecalPath(path),
                 displayName = (isTable and material.displayNameNoMods) or name,
                 sourceLabel = getDecalSourceLabel(language, associatedMods),
-                sourceKey = (associatedMods and associatedMods[1]) or "",
+                sourceKey = (associatedMods and associatedMods[1]) and tostring(associatedMods[1]) or "",
                 associatedMods = associatedMods,
                 tooltip = isTable and material.tooltipText or nil,
                 searchAttributes = isTable and material.searchAttributes or nil,
@@ -625,8 +625,11 @@ local function getPathTreeItems(materials, currentTool, currentLayer, favoritesL
             return lhsPriority < rhsPriority
         end
 
-        if lhs.sourceKey ~= rhs.sourceKey then
-            return lhs.sourceKey < rhs.sourceKey
+        local lhsSourceKey = tostring(lhs.sourceKey or "")
+        local rhsSourceKey = tostring(rhs.sourceKey or "")
+
+        if lhsSourceKey ~= rhsSourceKey then
+            return lhsSourceKey < rhsSourceKey
         end
 
         local lhsSegments = lhs.segments
@@ -3528,8 +3531,11 @@ local function ensurePreviewFiles(copyPrefix, folderPath, deferLoading)
     end
 
     table.sort(files, function(lhs, rhs)
-        if lhs.source ~= rhs.source then
-            return lhs.source < rhs.source
+        local lhsSource = tostring(lhs.source)
+        local rhsSource = tostring(rhs.source)
+
+        if lhsSource ~= rhsSource then
+            return lhsSource < rhsSource
         end
 
         return lhs.relative < rhs.relative
@@ -4042,8 +4048,11 @@ getMaterialItems = function(layer)
             end
 
             table.sort(files, function(lhs, rhs)
-                if lhs.source ~= rhs.source then
-                    return lhs.source < rhs.source
+                local lhsSource = tostring(lhs.source)
+                local rhsSource = tostring(rhs.source)
+
+                if lhsSource ~= rhsSource then
+                    return lhsSource < rhsSource
                 end
 
                 return lhs.relative < rhs.relative
