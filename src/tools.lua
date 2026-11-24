@@ -141,6 +141,11 @@ function toolHandler.loadTool(filename)
     local pathNoExt = utils.stripExtension(filename)
     local filenameNoExt = utils.filename(pathNoExt, "/")
 
+    -- Temporarily disabled, see the issue about the Scripts tool.
+    if filenameNoExt == "scripts" and not utils.startsWith(pathNoExt, "$") then
+        return
+    end
+
     local handler = utils.rerequire(pathNoExt)
 
     if type(handler) ~= "table" then
