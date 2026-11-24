@@ -334,6 +334,7 @@ ui.notifications.previewCopyInvalidMod=The current Mod structure is not valid, s
 ui.notifications.previewCopyDone=Copied %d files to '%s'.
 ui.notifications.namePreviewCopied=Name copied to the clipboard.
 ui.script_window.run_script=Run Scripts
+ui.script_window.needs_room=This script runs on a room: click a room or select one first.
 
 ui.preview_copy_window.title=Copy Object
 ui.preview_copy_window.relative_path=Relative Path

@@ -17,8 +17,22 @@ local drawing = require("utils.drawing")
 local colors = require("consts.colors")
 local registry = require("scripts.registry")
 local scriptsPanel = require("ui.windows.scripts_panel")
+local languageRegistry = require("language_registry")
 
 local tool = {}
+
+local function getString(key)
+    local language = languageRegistry.getLanguage()
+    local node = language and language.ui and language.ui.script_window
+    local value = node and node[key]
+
+    -- Missing entries resolve to the language system's placeholder node
+    if value == nil or (type(value) == "table" and rawget(value, "_exists") == false) then
+        return key
+    end
+
+    return tostring(value)
+end
 
 tool._type = "tool"
 tool.name = "scripts"
@@ -221,16 +235,13 @@ function tool.mouseclicked(x, y, button, istouch, pressed)
     -- Scripts that need a different secondary action (for example copying a spike config) can
     -- handle a right click themselves. This does not affect normal left click execution.
     if button == configs.editor.contextMenuButton and script.rightclick then
-        -- Match the left click behaviour: clicking an unselected room first focuses it, and the
-        -- script only runs on a click inside the focused/selected room.
         if not clickedItem then
             return false
         end
 
+        -- Clicking an unselected room focuses it, the right click action still runs on this click
         if tool.layer ~= "allRooms" and not selectionUtils.isItemSelected(clickedItem) then
             state.selectItem(clickedItem)
-
-            return true
         end
 
         script.rightclick({
@@ -250,24 +261,28 @@ function tool.mouseclicked(x, y, button, istouch, pressed)
 
     local addModifier = configs.editor.selectionAddModifier
 
-    -- Current Room only runs on the focused/selected items. Clicking another room focuses it,
-    -- shift/ctrl clicking a selected room removes it from the multi selection.
+    -- Current Room runs on the focused/selected items. Shift/ctrl clicking only changes the multi
+    -- selection; a plain click on another room focuses it and still runs the script on that click.
     if tool.layer ~= "allRooms" then
-        if not clickedItem then
-            return false
-        end
-
-        if keyboardHelper.modifierHeld(addModifier) then
+        if clickedItem and keyboardHelper.modifierHeld(addModifier) then
             selectionUtils.toggleItemSelection(clickedItem)
 
             return true
         end
 
-        if not selectionUtils.isItemSelected(clickedItem) then
+        if clickedItem and not selectionUtils.isItemSelected(clickedItem) then
             state.selectItem(clickedItem)
-
-            return true
         end
+    end
+
+    -- Scripts which only act per room (no panel, no whole map stage) need a target to work on
+    local needsTarget = script.run and not script.prerun and not script.open
+        and not (script.fieldOrder and #script.fieldOrder > 0)
+
+    if needsTarget and #getTargetRooms() == 0 then
+        notifications.notify(getString("needs_room"))
+
+        return true
     end
 
     useScript(script, {
