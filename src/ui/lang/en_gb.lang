@@ -462,6 +462,7 @@ ui.menubar.stylegrounds=Stylegrounds
 ui.menubar.dependencies=Dependencies
 ui.menubar.metadata=Metadata
 ui.menubar.save_map_image=Save Map Image
+ui.menubar.open_log_folder=Open Log Folder
 
 ui.menubar.ghost=Ghost
 ui.menubar.ghost_helper_hint=You Should Enable Loenn Helper to Use this Feature

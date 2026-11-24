@@ -657,6 +657,7 @@ ui.menubar.stylegrounds=背景
 ui.menubar.dependencies=依赖
 ui.menubar.metadata=元数据
 ui.menubar.save_map_image=保存地图图片
+ui.menubar.open_log_folder=打开 log 文件夹
 ui.menubar.ghost=玩家残影
 ui.menubar.ghost_helper_hint=请先启用 Loenn Helper 才能使用此功能
 ui.menubar.ghost_show_player=显示玩家残影

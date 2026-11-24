@@ -438,6 +438,7 @@ menubar.menubar = {
         {"dependencies", dependencyEditor.editDependencies},
         {"save_map_image", saveMapImage},
         {},
+        {"open_log_folder", openStorageDirectory},
         {"debug", {
             {"debug_reload_entities", debugUtils.reloadEntities},
             {"debug_redraw_map", debugUtils.redrawMap},
