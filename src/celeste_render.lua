@@ -416,6 +416,10 @@ function celesteRender.invalidateRoomCache(roomName, key)
             local keys = type(key) == "table" and key or {key}
             local overlays = roomTextOverlays[roomName]
 
+            -- Partial invalidation is the shape that used to leave stale batches behind
+            pcall(logging.log, "INFO", string.format("[diag] cache.invalidatePartial room=%s n=%d keys=%s",
+                tostring(roomName), #keys, table.concat(keys, ",")), nil, true)
+
             for _, layerKey in ipairs(keys) do
                 if layerKey == "entities" or layerKey == "triggers" or layerKey == "complete" then
                     roomTextReady[roomName] = nil

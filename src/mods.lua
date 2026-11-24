@@ -129,6 +129,9 @@ function modHandler.getPluginRoots(startFolder, modFolderName)
 
         if modHandler.isIsolatedPluginWhitelisted(modFolderName)
             or not modHandler.hasIsolatedCategory(modFolderName, startFolder) then
+            pcall(logging.log, "INFO", string.format("[diag] pluginRoots.fallback folder=%s category=%s",
+                tostring(modFolderName), tostring(startFolder)), nil, true)
+
             for _, folderName in ipairs(modHandler.pluginFolderNames) do
                 table.insert(roots, folderName)
             end
@@ -530,6 +533,9 @@ function modHandler.requireFromPlugin(lib, modName)
             "[plugins] failed to require '%s' (mod: %s); using safe stub",
             tostring(requireName), tostring(modName)))
     end
+
+    pcall(logging.log, "INFO", string.format("[diag] plugin.requireStub requireName=%s mod=%s",
+        tostring(requireName), tostring(modName)), nil, true)
 
     return safeStub
 end
@@ -1207,6 +1213,11 @@ end
 function modHandler.getModNamesFromMetadata(metadata)
     if metadata then
         if #metadata == 1 and metadata[1].Name then
+            if type(metadata[1].Name) ~= "string" then
+                pcall(logging.log, "INFO", string.format("[diag] modName.nonString raw=%s type=%s",
+                    tostring(metadata[1].Name), type(metadata[1].Name)), nil, true)
+            end
+
             return {tostring(metadata[1].Name)}
 
         else
@@ -1214,6 +1225,11 @@ function modHandler.getModNamesFromMetadata(metadata)
 
             for _, info in ipairs(metadata) do
                 if info.Name then
+                    if type(info.Name) ~= "string" then
+                        pcall(logging.log, "INFO", string.format("[diag] modName.nonString raw=%s type=%s",
+                            tostring(info.Name), type(info.Name)), nil, true)
+                    end
+
                     table.insert(names, tostring(info.Name))
                 end
             end

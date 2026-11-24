@@ -97,6 +97,15 @@ function languageRegistry.setFallbackLanguage(name)
     languageRegistry.fallbackLanguage = languageRegistry.languages[name]
 
     language.setFallback(languageRegistry.fallbackLanguage)
+
+    do
+        local ok, logging = pcall(require, "logging")
+
+        if ok then
+            pcall(logging.log, "INFO", string.format("[diag] language.setFallback name=%s exists=%s",
+                tostring(name), tostring(languageRegistry.fallbackLanguage ~= nil)), nil, true)
+        end
+    end
 end
 
 function languageRegistry.loadLanguageFile(filename)

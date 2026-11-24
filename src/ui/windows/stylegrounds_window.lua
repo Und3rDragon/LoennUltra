@@ -27,6 +27,7 @@ local effectStruct = require("structs.effect")
 local formUtils = require("ui.utils.forms")
 local atlases = require("atlases")
 local stylegroundPreviewData = require("styleground_preview")
+local logging = require("logging")
 
 local form = require("ui.forms.form")
 local tabbedWindow = require("ui.widgets.tabbed_window")
@@ -1218,6 +1219,11 @@ local function addNewStyle(interactionData, formFields)
     local listElement = interactionData.stylegroundListElement
     local foreground = listElement == interactionData.stylegroundListElementFg
     local map = interactionData.map
+    -- Diagnostic: addNewStyle currently has no call site (the "New" dropdown was removed).
+    -- This line records whether a future entry point actually reaches it.
+    pcall(logging.log, "INFO", string.format("[diag] styleground.addNewLayer begin method=%s",
+        tostring(interactionData.addNewMethod and interactionData.addNewMethod.method)), nil, true)
+
     local method = interactionData.addNewMethod.method
     local commit = beginStyleEdit(map)
 
@@ -1294,6 +1300,8 @@ local function addNewStyle(interactionData, formFields)
         commit("Add styleground")
         interactionData.rebuildListItems(listIndex + 1)
     end
+
+    pcall(logging.log, "INFO", "[diag] styleground.addNewLayer end ok=" .. tostring(newStyle ~= nil), nil, true)
 
     return not not newStyle
 end
@@ -1687,6 +1695,9 @@ local function getStylegroundFormButtons(interactionData, formFields, formOption
             table.insert(buttons, addToGroupButton)
         end
     end
+
+    -- Diagnostic: 0 means the button row was built with no entries at all
+    pcall(logging.log, "INFO", string.format("[diag] styleground.buttons n=%d", #buttons), nil, true)
 
     local buttonRow = formHelper.getFormButtonRow(buttons, formFields, formOptions)
 

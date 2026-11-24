@@ -62,6 +62,15 @@ function startupScene:firstEnter()
     languageRegistry.setLanguage(configs.general.language)
     languageRegistry.setFallbackLanguage("en_gb")
 
+    do
+        local ok, logging = pcall(require, "logging")
+
+        if ok then
+            pcall(logging.log, "INFO", string.format("[diag] language.startup current=%s fallback=en_gb",
+                tostring(configs.general.language)), nil, true)
+        end
+    end
+
     -- Skip this scene if Celeste directory is already configured
     if not startup.requiresInit() then
         self._alreadyConfigured = true

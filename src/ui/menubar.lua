@@ -16,6 +16,7 @@ local mods = require("mods")
 local meta = require("meta")
 local version = require("utils.version_parser")
 local viewportDevice = require("input_devices.viewport_device")
+local logging = require("logging")
 
 local utils = require("utils")
 local languageRegistry = require("language_registry")
@@ -60,12 +61,19 @@ local function openCelesteWiki()
 end
 
 local function saveMapImage()
+    pcall(logging.log, "INFO", "[diag] mapImage.dialogOpen", nil, true)
+
     filesystem.saveDialog(loadedState.filename, "png", function(filename)
         if not filename then
+            pcall(logging.log, "INFO", "[diag] mapImage.dialogCancelled", nil, true)
+
             return
         end
 
         local saved, reason = mapImageGenerator.saveMapImage(filename)
+
+        pcall(logging.log, "INFO", string.format("[diag] mapImage.dialogResult saved=%s reason=%s file=%s",
+            tostring(saved), tostring(reason), tostring(filename)), nil, true)
 
         if not saved then
             local language = languageRegistry.getLanguage()

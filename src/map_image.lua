@@ -2,6 +2,7 @@ local loadedState = require("loaded_state")
 local utils = require("utils")
 local celesteRender = require("celeste_render")
 local mapItemUtils = require("map_item_utils")
+local logging = require("logging")
 
 local mapImageGenerator = {}
 
@@ -138,7 +139,12 @@ function mapImageGenerator.getMapImageData(map)
 end
 
 function mapImageGenerator.saveMapImage(filename, map)
+    pcall(logging.log, "INFO", "[diag] mapImage.begin file=" .. tostring(filename), nil, true)
+
     local imageData, imageError = mapImageGenerator.getMapImageData(map)
+
+    pcall(logging.log, "INFO", string.format("[diag] mapImage.generated ok=%s err=%s",
+        tostring(imageData ~= nil), tostring(imageError)), nil, true)
 
     if not imageData then
         return false, imageError or "could not generate the map image"
@@ -172,8 +178,13 @@ function mapImageGenerator.saveMapImage(filename, map)
     end)
 
     if not success then
+        pcall(logging.log, "INFO", "[diag] mapImage.fail stage=readback err=" .. tostring(validationError), nil, true)
+
         return false, "the generated PNG could not be read back: " .. tostring(validationError)
     end
+
+    pcall(logging.log, "INFO", string.format("[diag] mapImage.done bytes=%d file=%s",
+        #data, tostring(filename)), nil, true)
 
     return true
 end

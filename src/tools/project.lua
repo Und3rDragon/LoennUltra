@@ -340,6 +340,9 @@ local function openWithShell(path)
 end
 
 local function openNativeFolder(path)
+    -- Diagnostic: openURL may block the main loop, flush before calling it
+    pcall(logging.log, "INFO", "[diag] project.openNativeFolder begin path=" .. tostring(path), nil, true)
+
     local started = love.timer.getTime()
     local opened = false
     local mode = "openURL"
@@ -370,11 +373,16 @@ local function openNativeFolder(path)
         return false
     end
 
+    pcall(logging.log, "INFO", string.format("[diag] project.openNativeFolder end ok=true mode=%s ms=%.0f",
+        tostring(mode), elapsed), nil, true)
+
     return true
 end
 
 -- Opens the folder in the file manager, creating it first when it does not exist yet
 local function openFolder(path)
+    pcall(logging.log, "INFO", "[diag] project.openFolder path=" .. tostring(path), nil, true)
+
     if not filesystem.pathAttributes(path) then
         local started = love.timer.getTime()
         local success, message = filesystem.mkpath(path)
@@ -396,6 +404,8 @@ end
 
 local function openProjectFolder(entry)
     return function()
+        pcall(logging.log, "INFO", "[diag] project.openProjectFolder key=" .. tostring(entry and entry.key), nil, true)
+
         local project = tool.getProject()
 
         if not project then

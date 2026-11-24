@@ -93,6 +93,9 @@ function toolHandler.selectTool(name)
     local handler = toolHandler.tools[name]
     local currentTool = toolHandler.currentTool
 
+    pcall(logging.log, "INFO", string.format("[diag] tool.select name=%s exists=%s current=%s",
+        tostring(name), tostring(handler ~= nil), tostring(toolHandler.currentToolName)), nil, true)
+
     if handler and currentTool ~= handler then
         local previousName = toolHandler.currentToolName
 

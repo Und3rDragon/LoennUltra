@@ -11,6 +11,7 @@ local configs = require("configs")
 local saveSanitizers = require("save_sanitizers")
 local windowTitleUtils = require("window_title")
 local modHandler = require("mods")
+local logging = require("logging")
 
 local sideStruct = require("structs.side")
 local mapStruct = require("structs.map")
@@ -133,11 +134,15 @@ end
 
 -- Calls before save functions
 function state.defaultBeforeSaveCallback(filename, state)
+    pcall(logging.log, "INFO", "[diag] save.beforeSanitize file=" .. tostring(filename), nil, true)
+
     return saveSanitizers.beforeSave(filename, state)
 end
 
 -- Updates state filename and flags history with no changes
 function state.defaultAfterSaveCallback(filename, state)
+    pcall(logging.log, "INFO", "[diag] save.afterSanitize file=" .. tostring(filename), nil, true)
+
     state.filename = filename
     history.madeChanges = false
 
@@ -280,6 +285,9 @@ local function mapSaveFailed(filename)
 end
 
 function state.saveFile(filename, afterSaveCallback, beforeSaveCallback, addExtIfMissing, verifyMap)
+    pcall(logging.log, "INFO", string.format("[diag] save.begin file=%s verify=%s",
+        tostring(filename), tostring(verifyMap ~= false)), nil, true)
+
     if filename and state.side then
         if addExtIfMissing ~= false and filesystem.fileExtension(filename) ~= "bin" then
             filename ..= ".bin"
@@ -287,12 +295,15 @@ function state.saveFile(filename, afterSaveCallback, beforeSaveCallback, addExtI
 
         -- Check if we are already saving, queue save and delay this
         if state.currentSaves[filename] then
+            pcall(logging.log, "INFO", "[diag] save.queued behind in-flight save file=" .. tostring(filename), nil, true)
+
             queueDelayedSave(filename, afterSaveCallback, beforeSaveCallback, addExtIfMissing, verifyMap)
 
             return
         end
 
         state.currentSaves[filename] = true
+        pcall(logging.log, "INFO", "[diag] save.lock-acquired file=" .. tostring(filename), nil, true)
 
         if afterSaveCallback ~= false then
             afterSaveCallback = afterSaveCallback or state.defaultAfterSaveCallback
@@ -587,6 +598,10 @@ function state.setLayerForceRender(baseLayer, layer, currentValue, otherValue, s
     if changesVisibility and silent ~= false then
         state.clearRoomRenderCache()
     end
+
+    pcall(logging.log, "INFO", string.format("[diag] layer.forceRender base=%s target=%s value=%s changesVisibility=%s cacheCleared=%s",
+        tostring(baseLayer), tostring(layer), tostring(currentValue),
+        tostring(changesVisibility), tostring(changesVisibility and silent ~= false)), nil, true)
 end
 
 function state.getLayerVisible(layer)
@@ -595,10 +610,14 @@ end
 
 function state.setLayerVisible(layer, visible, silent)
     local changed = state.setLayerInformation(layer, "visible", visible)
+    local cleared = changed and silent ~= false
 
-    if changed and silent ~= false then
+    if cleared then
         state.clearRoomRenderCache()
     end
+
+    pcall(logging.log, "INFO", string.format("[diag] layer.visible layer=%s want=%s changed=%s cacheCleared=%s",
+        tostring(layer), tostring(visible), tostring(changed), tostring(cleared)), nil, true)
 end
 
 function state.setShowDependendedOnMods(layer, value)
@@ -640,10 +659,13 @@ state.showRoomBackground = true
 function state.doCloseMap()
     local celesteRender = require("celeste_render")
 
+    pcall(logging.log, "INFO", "[diag] map.close begin file=" .. tostring(state.filename), nil, true)
+
     celesteRender.invalidateRoomCache()
     celesteRender.clearBatchingTasks()
 
     history.reset()
+    pcall(logging.log, "INFO", "[diag] map.close historyReset", nil, true)
 
     if not state.closeMapHistoryGuard then
         state.closeMapHistoryGuard = true
@@ -670,6 +692,8 @@ function state.doCloseMap()
     state.subLayers = nil
     state.selectedItem = nil
     state.selectedItemType = nil
+
+    pcall(logging.log, "INFO", "[diag] map.close mapNil", nil, true)
 
     windowTitleUtils.updateWindowTitle(state)
     sceneHandler.changeScene("Editor")
