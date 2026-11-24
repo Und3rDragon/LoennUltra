@@ -1879,7 +1879,8 @@ local function materialDataToElement(list, data, element)
                         local data = self.itemData
 
                         if data and data.stylegroundDrag and stylegroundDragState
-                            and stylegroundDragState.itemData == data then
+                            and stylegroundDragState.kind == data.stylegroundKind
+                            and stylegroundDragState.label == data.stylegroundLabel then
                             updateStylegroundDrag(x, y)
 
                             return true
@@ -1892,7 +1893,8 @@ local function materialDataToElement(list, data, element)
                         local data = self.itemData
 
                         if data and data.stylegroundDrag and stylegroundDragState
-                            and stylegroundDragState.itemData == data then
+                            and stylegroundDragState.kind == data.stylegroundKind
+                            and stylegroundDragState.label == data.stylegroundLabel then
                             finishStylegroundDrag(x, y)
 
                             return true
